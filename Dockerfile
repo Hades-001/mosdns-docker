@@ -1,5 +1,17 @@
 FROM alpine:3.14.0
 
+########################################
+#              Settings                #
+########################################
+
+ENV DNS_PORT    53
+ENV DOH_PORT    443
+ENV DOT_PORT    853
+
+########################################
+#               Build                  #
+########################################
+
 ARG MOSDNS_VER=v1.8.6
 ARG PLATFORM=amd64
 ARG MOSDNS_URL=https://github.com/IrineSistiana/mosdns/releases/download/${MOSDNS_VER}/mosdns-linux-${PLATFORM}.zip
@@ -24,6 +36,6 @@ COPY docker-entrypoint.sh /bin/entrypoint.sh
 RUN chmod a+x /bin/entrypoint.sh
 ENTRYPOINT ["/bin/entrypoint.sh"]
 
-EXPOSE 53
+EXPOSE ${DNS_PORT} ${DOH_PORT} ${DOT_PORT}
 
 CMD /usr/bin/mosdns -dir /etc/mosdns
