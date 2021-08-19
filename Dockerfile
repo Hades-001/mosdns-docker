@@ -28,6 +28,4 @@ COPY docker-entrypoint.sh /bin/entrypoint.sh
 RUN chmod a+x /bin/entrypoint.sh
 ENTRYPOINT ["/bin/entrypoint.sh"]
 
-EXPOSE 53/udp 53/tcp
-
 CMD /usr/bin/mosdns -dir /etc/mosdns
