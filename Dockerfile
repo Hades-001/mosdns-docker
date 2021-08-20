@@ -14,13 +14,17 @@ RUN set -ex && \
 FROM --platform=${TARGETPLATFORM} alpine:latest
 COPY --from=builder /root/mosdns/mosdns /usr/bin/
 
-RUN apk add --no-cache ca-certificates su-exec
+RUN apk add --no-cache ca-certificates su-exec tzdata
 
 RUN mkdir /etc/mosdns
 
 VOLUME ["/etc/mosdns"]
 
 WORKDIR /etc/mosdns
+
+ENV TZ=Asia/Shanghai
+RUN cp /usr/share/zoneinfo/${TZ} /etc/localtime && \
+	echo "${TZ}" > /etc/timezone
 
 ENV PUID=1000 PGID=1000 HOME=/etc/mosdns
 
