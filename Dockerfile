@@ -14,7 +14,9 @@ RUN set -ex && \
 FROM --platform=${TARGETPLATFORM} alpine:latest
 COPY --from=builder /root/mosdns/mosdns /usr/bin/
 
-RUN apk add --no-cache ca-certificates su-exec tzdata
+RUN apk add --no-cache ca-certificates su-exec tzdata libcap
+
+RUN setcap CAP_NET_BIND_SERVICE=+eip /usr/bin/mosdns
 
 RUN mkdir /etc/mosdns
 
