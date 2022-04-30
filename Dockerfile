@@ -23,18 +23,14 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 RUN set -ex && \
     apt-get update && \
-    apt-get install --no-install-recommends -y ca-certificates tzdata gosu && \
+    apt-get install --no-install-recommends -y ca-certificates gosu && \
     rm -rf /var/lib/apt/lists/*
-
-ENV TZ=Asia/Shanghai
-RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
-	echo "${TZ}" > /etc/timezone && \
-    dpkg-reconfigure --frontend noninteractive tzdata
 
 VOLUME ["/etc/mosdns"]
 
 WORKDIR /etc/mosdns
 
+ENV TZ=Asia/Shanghai
 ENV PUID=1000 PGID=1000 HOME=/etc/mosdns
 
 COPY docker-entrypoint.sh /bin/entrypoint.sh
