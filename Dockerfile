@@ -1,32 +1,39 @@
-FROM --platform=${TARGETPLATFORM} golang:1.18-alpine as builder
+FROM --platform=${TARGETPLATFORM} golang:1.18-bullseye as builder
+
 ARG CGO_ENABLED=0
 ARG TAG
+ARG DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /root
-RUN set -ex && \
-	apk add --update git && \
-	git clone https://github.com/IrineSistiana/mosdns mosdns && \
-	cd ./mosdns && \
-	git fetch --all --tags && \
-	git checkout tags/${TAG} && \
-	go build -ldflags "-s -w -X main.version=${TAG}" -trimpath -o mosdns
 
-FROM --platform=${TARGETPLATFORM} alpine:latest
+RUN set -ex && \
+    apt-get update && \
+    apt-get install --no-install-recommends -y ca-certificates git libcap2-bin && \
+    git clone https://github.com/IrineSistiana/mosdns mosdns && \
+    cd ./mosdns && \
+    git fetch --all --tags && \
+    git checkout tags/${TAG} && \
+    go build -ldflags "-s -w -X main.version=${TAG}" -trimpath -o mosdns && \
+    setcap CAP_NET_BIND_SERVICE=+eip mosdns
+
+FROM --platform=${TARGETPLATFORM} debian:11-slim
 COPY --from=builder /root/mosdns/mosdns /usr/bin/
 
-RUN apk add --no-cache ca-certificates su-exec tzdata libcap
+ARG DEBIAN_FRONTEND=noninteractive
 
-RUN setcap CAP_NET_BIND_SERVICE=+eip /usr/bin/mosdns
+RUN set -ex && \
+    apt-get update && \
+    apt-get install --no-install-recommends -y ca-certificates tzdata gosu && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN mkdir /etc/mosdns
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
+	echo "${TZ}" > /etc/timezone && \
+    dpkg-reconfigure --frontend noninteractive tzdata
 
 VOLUME ["/etc/mosdns"]
 
 WORKDIR /etc/mosdns
-
-ENV TZ=Asia/Shanghai
-RUN cp /usr/share/zoneinfo/${TZ} /etc/localtime && \
-	echo "${TZ}" > /etc/timezone
 
 ENV PUID=1000 PGID=1000 HOME=/etc/mosdns
 

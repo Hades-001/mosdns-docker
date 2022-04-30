@@ -1,11 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 
 set -eu
 
 if [ "$(id -u)" = '0' ]; then
-  chown "${PUID}:${PGID}" "${HOME}" \
-    && exec su-exec "${PUID}:${PGID}" \
-       env HOME="$HOME" "$@"
+  chown -R "${PUID}:${PGID}" "${HOME}" && \
+  exec gosu "${PUID}:${PGID}" "$@"
 else
   exec "$@"
 fi
