@@ -16,25 +16,9 @@ RUN set -ex && \
     go build -ldflags "-s -w -X main.version=${TAG}" -trimpath -o mosdns && \
     setcap CAP_NET_BIND_SERVICE=+eip mosdns
 
-FROM --platform=${TARGETPLATFORM} debian:11-slim
+FROM --platform=${TARGETPLATFORM} gcr.io/distroless/base-debian11
 COPY --from=builder /root/mosdns/mosdns /usr/bin/
 
-ARG DEBIAN_FRONTEND=noninteractive
-
-RUN set -ex && \
-    apt-get update && \
-    apt-get install --no-install-recommends -y ca-certificates gosu && \
-    rm -rf /var/lib/apt/lists/*
-
-VOLUME ["/etc/mosdns"]
-
-WORKDIR /etc/mosdns
-
 ENV TZ=Asia/Shanghai
-ENV PUID=1000 PGID=1000 HOME=/etc/mosdns
 
-COPY docker-entrypoint.sh /bin/entrypoint.sh
-RUN chmod a+x /bin/entrypoint.sh
-ENTRYPOINT ["/bin/entrypoint.sh"]
-
-CMD /usr/bin/mosdns -dir /etc/mosdns
+CMD [ "/usr/bin/mosdns" ]
