@@ -1,4 +1,4 @@
-FROM --platform=${TARGETPLATFORM} golang:1.20-bullseye as builder
+FROM --platform=${TARGETPLATFORM} golang:1.21-bullseye as builder
 
 ARG CGO_ENABLED=0
 ARG TAG
