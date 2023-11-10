@@ -1,4 +1,4 @@
-FROM --platform=${TARGETPLATFORM} golang:1.21-bullseye as builder
+FROM --platform=${TARGETPLATFORM} golang:1.21-bookworm as builder
 
 ARG CGO_ENABLED=0
 ARG TAG
@@ -16,7 +16,7 @@ RUN set -ex && \
     go build -ldflags "-s -w -X main.version=${TAG}" -trimpath -o mosdns && \
     setcap CAP_NET_BIND_SERVICE=+eip mosdns
 
-FROM --platform=${TARGETPLATFORM} gcr.io/distroless/base-debian11
+FROM --platform=${TARGETPLATFORM} gcr.io/distroless/static-debian12
 COPY --from=builder /root/mosdns/mosdns /usr/bin/
 
 ENV TZ=Asia/Shanghai
